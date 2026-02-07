@@ -5,16 +5,6 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (pathname.startsWith("/auth/verify-magic") || pathname.startsWith("/api/auth/magic/verify")) {
-    console.info("[magic-middleware]", {
-      path: pathname,
-      method: request.method,
-      host: request.headers.get("host"),
-      forwardedProto: request.headers.get("x-forwarded-proto"),
-      forwardedHost: request.headers.get("x-forwarded-host"),
-      url: request.nextUrl.toString(),
-    });
-  }
 
   // Get identifier (IP or user ID)
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -75,12 +65,6 @@ export async function middleware(request: NextRequest) {
 
   // Check authentication for admin routes
   if (pathname.startsWith("/admin")) {
-    console.info("[middleware-admin]", {
-      path: pathname,
-      hasToken: !!token,
-      tokenData: token ? { id: token.id, email: token.email } : null,
-      cookies: request.cookies.getAll().map(c => c.name),
-    });
     if (!token) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }

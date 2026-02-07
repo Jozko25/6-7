@@ -91,11 +91,8 @@ async function verifyMagicLink(req: NextRequest, token: string, email: string) {
     maxAge: sessionMaxAge,
   });
 
-  console.info("[magic-verify]", { requestId, userId: user.id });
-
   const response = NextResponse.json({ success: true });
 
-  // Don't set explicit domain - let browser handle it automatically
   response.cookies.set(cookieName, jwtToken, {
     httpOnly: true,
     path: "/",
@@ -104,13 +101,7 @@ async function verifyMagicLink(req: NextRequest, token: string, email: string) {
     expires: sessionExpiry,
   });
 
-  console.info("[magic-verify]", {
-    requestId,
-    userId: user.id,
-    cookieSet: cookieName,
-    cookieSecure: process.env.NODE_ENV === "production",
-    host: req.headers.get("host"),
-  });
+  console.info("[magic-verify]", { requestId, userId: user.id });
   return response;
 }
 
@@ -159,19 +150,9 @@ export async function GET(req: NextRequest) {
 
   // Copy all cookies from the verification response to the redirect response
   const cookies = result.cookies.getAll();
-  console.info("[magic-verify-redirect]", {
-    cookiesFromResult: cookies.length,
-    cookieNames: cookies.map(c => c.name),
-  });
-
   for (const cookie of cookies) {
     redirectResponse.cookies.set(cookie);
   }
-
-  console.info("[magic-verify-redirect]", {
-    redirectTo: "/admin",
-    redirectCookies: redirectResponse.cookies.getAll().map(c => c.name),
-  });
 
   return redirectResponse;
 }
