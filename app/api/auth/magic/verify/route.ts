@@ -93,24 +93,24 @@ async function verifyMagicLink(req: NextRequest, token: string, email: string) {
 
   console.info("[magic-verify]", { requestId, userId: user.id });
 
-  // Get the correct domain from headers or NEXTAUTH_URL
-  const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host");
-  const protocol = req.headers.get("x-forwarded-proto") || "https";
-  const baseUrl = process.env.NEXTAUTH_URL || `${protocol}://${forwardedHost}`;
-  const domain = new URL(baseUrl).hostname;
-
   const response = NextResponse.json({ success: true });
 
+  // Don't set explicit domain - let browser handle it automatically
   response.cookies.set(cookieName, jwtToken, {
     httpOnly: true,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     expires: sessionExpiry,
-    domain: process.env.NODE_ENV === "production" ? domain : undefined,
   });
 
-  console.info("[magic-verify]", { requestId, userId: user.id, cookieSet: cookieName, domain });
+  console.info("[magic-verify]", {
+    requestId,
+    userId: user.id,
+    cookieSet: cookieName,
+    cookieSecure: process.env.NODE_ENV === "production",
+    host: req.headers.get("host"),
+  });
   return response;
 }
 
@@ -159,9 +159,19 @@ export async function GET(req: NextRequest) {
 
   // Copy all cookies from the verification response to the redirect response
   const cookies = result.cookies.getAll();
+  console.info("[magic-verify-redirect]", {
+    cookiesFromResult: cookies.length,
+    cookieNames: cookies.map(c => c.name),
+  });
+
   for (const cookie of cookies) {
     redirectResponse.cookies.set(cookie);
   }
+
+  console.info("[magic-verify-redirect]", {
+    redirectTo: "/admin",
+    redirectCookies: redirectResponse.cookies.getAll().map(c => c.name),
+  });
 
   return redirectResponse;
 }

@@ -67,6 +67,12 @@ export async function middleware(request: NextRequest) {
 
   // Check authentication for admin routes
   if (pathname.startsWith("/admin")) {
+    console.info("[middleware-admin]", {
+      path: pathname,
+      hasToken: !!token,
+      tokenData: token ? { id: token.id, email: token.email } : null,
+      cookies: request.cookies.getAll().map(c => c.name),
+    });
     if (!token) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
