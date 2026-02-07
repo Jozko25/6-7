@@ -29,8 +29,14 @@ export async function middleware(request: NextRequest) {
   let reset = Date.now() + 60_000;
   let remaining = 1000;
 
-  // Avoid throttling auth flows during local development
-  if (process.env.NODE_ENV === "production" || rateLimitType !== "auth") {
+  const disableAuthRateLimit =
+    process.env.DISABLE_AUTH_RATELIMIT === "true" ||
+    process.env.RAILWAY_ENVIRONMENT;
+
+  if (
+    rateLimitType !== "auth" ||
+    (!disableAuthRateLimit && process.env.NODE_ENV === "production")
+  ) {
     ({ success, limit, reset, remaining } = await checkRateLimit(
       identifier,
       rateLimitType
