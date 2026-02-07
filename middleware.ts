@@ -10,6 +10,8 @@ export async function middleware(request: NextRequest) {
       path: pathname,
       method: request.method,
       host: request.headers.get("host"),
+      forwardedProto: request.headers.get("x-forwarded-proto"),
+      forwardedHost: request.headers.get("x-forwarded-host"),
       url: request.nextUrl.toString(),
     });
   }

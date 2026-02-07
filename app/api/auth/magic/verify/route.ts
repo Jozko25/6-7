@@ -134,13 +134,16 @@ export async function GET(req: NextRequest) {
 
   if (!token || !email) {
     console.warn("[magic-verify]", { reason: "missing_query_params" });
-    return NextResponse.redirect(new URL("/auth/error", url.origin));
+    const base = process.env.NEXTAUTH_URL ?? url.origin;
+    return NextResponse.redirect(new URL("/auth/error", base));
   }
 
   const result = await verifyMagicLink(req, token, email);
   if (!result.ok) {
-    return NextResponse.redirect(new URL("/auth/error", url.origin));
+    const base = process.env.NEXTAUTH_URL ?? url.origin;
+    return NextResponse.redirect(new URL("/auth/error", base));
   }
 
-  return NextResponse.redirect(new URL("/admin", url.origin));
+  const base = process.env.NEXTAUTH_URL ?? url.origin;
+  return NextResponse.redirect(new URL("/admin", base));
 }
