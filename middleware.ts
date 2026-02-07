@@ -5,6 +5,14 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/auth/verify-magic") || pathname.startsWith("/api/auth/magic/verify")) {
+    console.info("[magic-middleware]", {
+      path: pathname,
+      method: request.method,
+      host: request.headers.get("host"),
+      url: request.nextUrl.toString(),
+    });
+  }
 
   // Get identifier (IP or user ID)
   const forwardedFor = request.headers.get("x-forwarded-for");
