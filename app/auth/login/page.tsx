@@ -35,22 +35,22 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      console.log("SignIn result:", result);
-
       if (result?.error) {
-        // Check for 2FA requirement in the error message
-        if (result.error === "2FA_REQUIRED" || result.error.includes("2FA")) {
+        // Check for 2FA requirement - NextAuth wraps errors as "Configuration"
+        // If we get Configuration error and haven't shown 2FA input yet, prompt for 2FA
+        if (result.error === "2FA_REQUIRED" ||
+            result.error.includes("2FA") ||
+            (result.error === "Configuration" && !needs2FA)) {
           setNeeds2FA(true);
           setError("Please enter your 2FA code");
         } else {
           setError(result.error);
         }
-      } else if (result?.ok) {
+      } else if (result?.ok && !result?.error) {
         router.push("/admin");
         router.refresh();
       }
     } catch (err) {
-      console.error("SignIn error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);

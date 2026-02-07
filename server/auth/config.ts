@@ -60,16 +60,16 @@ const providers: any[] = [
 
         // Step 5: Check if 2FA is enabled
         if (user.twoFactorEnabled) {
-          console.log("[2FA] totpToken received:", credentials.totpToken, "type:", typeof credentials.totpToken);
+          const token = credentials.totpToken as string | undefined;
+          const hasToken = token && token !== "" && token !== "undefined";
 
-          if (!credentials.totpToken || credentials.totpToken === "") {
-            console.log("[2FA] No token provided, throwing 2FA_REQUIRED");
+          if (!hasToken) {
             throw new Error("2FA_REQUIRED");
           }
 
           const is2FAValid = verify2FAToken(
             user.twoFactorSecret!,
-            credentials.totpToken as string
+            token as string
           );
 
           if (!is2FAValid) {
