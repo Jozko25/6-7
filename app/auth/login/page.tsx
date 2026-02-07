@@ -35,8 +35,11 @@ export default function LoginPage() {
         redirect: false,
       });
 
+      console.log("SignIn result:", result);
+
       if (result?.error) {
-        if (result.error === "2FA_REQUIRED") {
+        // Check for 2FA requirement in the error message
+        if (result.error === "2FA_REQUIRED" || result.error.includes("2FA")) {
           setNeeds2FA(true);
           setError("Please enter your 2FA code");
         } else {
@@ -47,6 +50,7 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (err) {
+      console.error("SignIn error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
