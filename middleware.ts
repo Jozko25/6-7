@@ -19,9 +19,17 @@ export async function middleware(request: NextRequest) {
   // Get identifier (IP or user ID)
   const forwardedFor = request.headers.get("x-forwarded-for");
   const ip = forwardedFor?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip") ?? "unknown";
+
+  // Specify the correct cookie name for production
+  const cookieName = process.env.NODE_ENV === "production"
+    ? "__Secure-authjs.session-token"
+    : "authjs.session-token";
+
   const token = await getToken({
     req: request as any,
     secret: process.env.NEXTAUTH_SECRET,
+    cookieName,
+    salt: cookieName,
   });
   const identifier = token?.id?.toString() ?? ip;
 
