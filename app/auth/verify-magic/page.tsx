@@ -5,11 +5,11 @@ interface VerifyMagicPageProps {
   searchParams: { token?: string; email?: string };
 }
 
-export default function VerifyMagicPage({ searchParams }: VerifyMagicPageProps) {
+export default async function VerifyMagicPage({ searchParams }: VerifyMagicPageProps) {
   const token = searchParams.token;
   const email = searchParams.email;
 
-  const h = headers();
+  const h = await headers();
   const forwardedProto = h.get("x-forwarded-proto");
   const forwardedHost = h.get("x-forwarded-host");
   const host = forwardedHost ?? h.get("host");
