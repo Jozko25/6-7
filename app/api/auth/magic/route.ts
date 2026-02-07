@@ -35,7 +35,8 @@ export async function POST(req: Request) {
   });
 
   // Link goes to a landing page that will POST the token (prevents referrer leak)
-  const url = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/auth/verify-magic?token=${token}&email=${encodeURIComponent(email)}`;
+  const baseUrl = (process.env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+  const url = `${baseUrl}/auth/verify-magic?token=${token}&email=${encodeURIComponent(email)}`;
 
   await sendEmail({
     to: email,
