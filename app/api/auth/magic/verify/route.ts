@@ -93,12 +93,13 @@ async function verifyMagicLink(req: NextRequest, token: string, email: string) {
 
   console.info("[magic-verify]", { requestId, userId: user.id });
 
-  // Return success for POST requests or API calls
-  const response = NextResponse.json({
-    success: true,
-    cookieName,
-    jwtToken
-  });
+  // Get the correct domain from headers or NEXTAUTH_URL
+  const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  const protocol = req.headers.get("x-forwarded-proto") || "https";
+  const baseUrl = process.env.NEXTAUTH_URL || `${protocol}://${forwardedHost}`;
+  const domain = new URL(baseUrl).hostname;
+
+  const response = NextResponse.json({ success: true });
 
   response.cookies.set(cookieName, jwtToken, {
     httpOnly: true,
@@ -106,8 +107,10 @@ async function verifyMagicLink(req: NextRequest, token: string, email: string) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     expires: sessionExpiry,
+    domain: process.env.NODE_ENV === "production" ? domain : undefined,
   });
 
+  console.info("[magic-verify]", { requestId, userId: user.id, cookieSet: cookieName, domain });
   return response;
 }
 
